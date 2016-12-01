@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>海量日志查询系统</title>
+    <script type="text/javascript" src="/javascripts/components/jquery-3.1.1.min.js"></script>
+    <script type="text/javascript" src="/javascripts/components/bootstrap.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="/stylesheets/components/bootstrap.min.css">
+    <style>
+        body{
+            font-family: "微软雅黑";
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-inverse" role="navigation">
+    <div class="navbar-header">
+        <a class="navbar-brand" href="#">海量日志查询系统</a>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="row-fluid">
+        <div class="col-xs-2">
+            <div class="well sidebar-nav">
+                <ul class="nav nav-list">
+                    <li class="nav-header">实时查询</li>
+                    <li class="active"><a href="statics/html/ip.html">特定IP目标原始流量</a></li>
+                    <li><a href="statics/html/feature.html">特定特征命中原始流量</a></li>
+                    <li><a href="statics/html/origin.html">重点签约用户原始流量</a></li>
+                    <li class="nav-header">历史查询</li>
+                    <li><a href="statics/html/message_relative.html">通讯连接关系数据</a></li>
+                    <li><a href="statics/html/domain_record.html">通用域名连接记录</a></li>
+                    <li><a href="statics/html/specified_target.html">特定目标连接记录</a></li>
+                    <li class="nav-header">指令状态查询</li>
+                    <li><a href="statics/html/cmd_status.html">指令生效状态</a></li>
+                    <li><a href="statics/html/origin_count.html">原始流量统计</a></li>
+                    <li><a href="statics/html/history_count.html">历史信息回溯流量统计</a></li>
+                    <li class="nav-header">指令记录查询</li>
+                    <li><a href="statics/html/cmd_query_record.html">指令查询历史记录</a></li>
+                    <li><a href="statics/html/cmd_delete">删除指令记录</a></li>
+                </ul>
+            </div><!--/.well -->
+        </div>
+        <div class="col-xs-10 well">
+            <span><%= data %></span>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
