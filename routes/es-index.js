@@ -19,15 +19,15 @@ var pageObj =  {
             hello: "elasticsearch"
         }, function (error) {
             if (error) {
-                console.error('elasticsearch cluster is down!');
+                console.error('elasticsearch 集群已挂!');
                 return false;
             } else {
-                console.log('All is well');
+                console.log('连接成功');
             }
         });
         return true;
     },
-    searchAll : function () {
+    searchAll : function (req,res,next) {
         if(this.testConnection()){
             this.client.search({
                 index:'zfd',
@@ -37,6 +37,7 @@ var pageObj =  {
             }).then(function (body) {
                 pageObj.hits='';
                 pageObj.hits = body.hits.hits;
+                res.render('es-index', { data: JSON.stringify(pageObj.hits) });
                 console.log(pageObj.hits);
             }, function (error) {
                 console.trace(error.message);
@@ -47,8 +48,7 @@ var pageObj =  {
 
 /* GET es-index page. */
 router.get('/', function(req, res, next) {
-    pageObj.searchAll();
-    res.render('es-index', { data: JSON.stringify(pageObj.hits) });
+    pageObj.searchAll(req,res,next);
 });
 
 module.exports = router;
