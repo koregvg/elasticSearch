@@ -3,12 +3,12 @@
  */
 
 var cnf_id = 0;
-var offset=15;
-var tuple_num=0;
-var total=0;
-var n=total/15;
+var offset = 15;
+var tuple_num = 0;
+var total = 0;
+var n = total / 15;
 
-var sum=0;
+var sum = 0;
 var produceLine = '';
 var type = '';
 var bid = '';
@@ -17,48 +17,56 @@ var opcode = '';
 var start_time = '';
 var end_time = '';
 
+var statusArray = [];
+statusArray[0] = "查询成功";
+statusArray[1] = "查无数据";
+statusArray[2] = "时间字段错误";
+statusArray[3] = "IP地址字段错误";
+statusArray[4] = "掩码错误";
+statusArray[5] = "未知错误";
+statusArray[6] = "网络连接错误，无法与后端进行通讯";
+statusArray[7] = "错误的请求地址";
+statusArray[8] = "协议异常";
+statusArray[9] = "不支持的编码";
 
-function dopage(tuple_num,offset,n){
-    for(i=1;i<=n;i++)
-        $("#pager").append("<li><a href='javascript:void(0)' onclick='pageAjax(tuple_num,offset,n)'>"+i+"</a></li>");
+
+function Again(){
+    $("#query").show();
+    $("#data").hide();
+}
+
+$('#again').click(function () {
+    Again();
+});
+
+function dopage(tuple_num, offset, n) {
+    for (i = 1; i <= n; i++)
+        $("#pager").append("<li><a href='javascript:void(0)' onclick='pageAjax(tuple_num,offset,n)'>" + i + "</a></li>");
 }
 
 function getFormData() {
-     produceLine = $("#productLine").val();
-     type = $("#type").val();
-     bid = $("#bidInput").val();
-     clientIP = $("#clientIPInput").val();
-     opcode = $("#opcodeInput").val();
-     start_time = $("#start_time").val();
-     end_time = $("#end_time").val();
+    produceLine = $("#productLine").val();
+    type = $("#type").val();
+    bid = $("#bidInput").val();
+    clientIP = $("#clientIPInput").val();
+    opcode = $("#opcodeInput").val();
+    start_time = $("#start_time").val();
+    end_time = $("#end_time").val();
 }
 
 function doAjax() {
 
     getFormData();
 
-    var statusArray=["成功","指令ID重复","缺少必选字段","字段定义冲突",
-        "版本错误","检验码错误","操作类型错误","长度错误","用户标识错误",
-        "规则数量错误","数据查询失败","权限错误","指令处理超时"];
-    statusArray[0]="查询成功";
-    statusArray[32]="时间字段错误";
-    statusArray[33]="IP地址字段错误";
-    statusArray[34]="掩码错误";
-    statusArray[34]="未知错误";
-    statusArray[301]="网络连接错误，无法与后端进行通讯";
-    statusArray[302]="错误的请求地址";
-    statusArray[303]="协议异常";
-    statusArray[304]="不支持的编码";
-
     var request = {
-        unit : {
+        unit: {
             produceLine: produceLine,
             type: type,
-            bid:bid,
-            clientIP:clientIP,
-            opcode:opcode,
-            start_time:start_time,
-            end_time:end_time
+            bid: bid,
+            clientIP: clientIP,
+            opcode: opcode,
+            start_time: start_time,
+            end_time: end_time
             //request_field : request_field
         }
         // offset:offset,
@@ -77,8 +85,11 @@ function doAjax() {
         contentType: 'application/json; charset=utf-8',
         success: function (data) {
             $("#aye").button('reset');
-            if (data.status == 0){
-                $('#searchData').text(JSON.stringify(data.result));
+            if (data.status == 0) {
+                $("#searchData").empty();
+                $.each(data.result, function(i, item) {
+                    $("#searchData").append('<div>'+JSON.stringify(item)+'</div>');
+                });
                 $('#query').hide();
                 $('#data').show();
 
@@ -91,9 +102,9 @@ function doAjax() {
                 $('.modal-body').text(statusArray[data.status]);
                 $('#myModal').modal('show');
             }
-            else{
-                $(".modal-body").text("错误码"+" "+data.status+" "+statusArray[status]);
-                $('.modal-body').text(statusArray[data.status]);
+            else {
+                $(".modal-body").text("错误码:" + " " + data.status + " " + statusArray[data.status]);
+                $('#myModal').modal('show');
             }
 
 //         Do Anything After get Return data

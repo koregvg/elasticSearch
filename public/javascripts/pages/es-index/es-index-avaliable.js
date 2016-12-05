@@ -23,9 +23,8 @@ function CheckAdd() {
 
 	if (num == 0) {
 		$("#aye").button('loading');
-		doAjax();
+		setTimeout('doAjax()',1000);
 	}
-
 
 	function UnnullClear(ele) {
 
@@ -41,9 +40,4 @@ function CheckAdd() {
 	function RmError(ele, text) {
 		$(ele).find("span").eq(0).text(text);
 	}
-}
-
-function Again(){
-	$("#query").show();
-	$("#data").hide();
 }

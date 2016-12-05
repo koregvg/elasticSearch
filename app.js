@@ -4,6 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var partials = require('express-partials');
 
 //路由映射表
 var index = require('./routes/index');
@@ -24,10 +25,13 @@ app.use(cookieParser());
 app.use(require('node-sass-middleware')({
     src: path.join(__dirname, 'public'),
     dest: path.join(__dirname, 'public'),
+    debug: true,
+    outputStyle:'compressed',
     indentedSyntax: true,
-    sourceMap: true
+    sourceMap: true,
 }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(partials());
 
 //启动映射
 app.use('/', index);
