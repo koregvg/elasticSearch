@@ -7,11 +7,11 @@ var bodyParser = require('body-parser');
 var partials = require('express-partials');
 
 //路由映射表
-var index = require('./routes/index');
+var index = require('./src/routes/index');
 
 var app = express();
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'src/views'));
 app.engine('html', require('ejs').renderFile);
 // app.set('view engine', 'ejs');
 app.set('view engine', 'html');
@@ -22,15 +22,15 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
-app.use(require('node-sass-middleware')({
-    src: path.join(__dirname, 'public'),
-    dest: path.join(__dirname, 'public'),
-    debug: true,
-    outputStyle:'compressed',
-    indentedSyntax: true,
-    sourceMap: true,
-}));
-app.use(express.static(path.join(__dirname, 'public')));
+// app.use(require('node-sass-middleware')({
+//     src: path.join(__dirname, 'public'),
+//     dest: path.join(__dirname, 'public'),
+//     debug: true,
+//     outputStyle:'compressed',
+//     indentedSyntax: true,
+//     sourceMap: true,
+// }));
+app.use(express.static(path.join(__dirname, 'src/public')));
 app.use(partials());
 
 //启动映射
