@@ -21,12 +21,35 @@ const gulpSequence = require('gulp-sequence');
 const rev = require('gulp-rev');
 const revReplace = require('gulp-rev-replace');
 
-gulp.task('all', function (cb) {
-    gulpSequence('html-staff','css-staff','js-staff','add-rev','revreplace', cb)
+var replaceStaticRoot = (filename)=> {
+    if ((filename.indexOf('.js') > -1) || (filename.indexOf('.css') > -1)) {
+        return filename.replace('public/', '');
+    }
+    return filename;
+};
+
+gulp.task('all', (cb)=> {
+    gulpSequence('html-staff', 'css-staff', 'js-staff', 'add-rev', 'revreplace', 'copy', cb)
 });
 
-gulp.task('add-rev', function () {
-    return gulp.src(["tmp/**/*.css", "tmp/**/*.js"])
+gulp.task('copy', (cb)=> {
+    gulpSequence('copyCSS', 'copyJS', cb)
+});
+
+gulp.task('copyCSS', (cb)=> {
+    return gulp.src('src/public/stylesheets/components/**/*.css')
+        .pipe(gulp.dest('build/public/stylesheets/components'))
+        .pipe(notify({message: 'copyCSS complete'}))
+});
+
+gulp.task('copyJS', (cb)=> {
+    return gulp.src('src/public/javascripts/components/**/*.js')
+        .pipe(gulp.dest('build/public/javascripts/components'))
+        .pipe(notify({message: 'copyJS complete'}))
+});
+
+gulp.task('add-rev', (cb)=> {
+    return gulp.src(['tmp/**/*.css', 'tmp/**/*.js'])
         .pipe(rev())
         .pipe(gulp.dest('build'))
         .pipe(rev.manifest())
@@ -34,32 +57,36 @@ gulp.task('add-rev', function () {
         .pipe(notify({message: 'add-rev complete'}))
 });
 
-gulp.task("revreplace", function(){
+gulp.task("revreplace", (cb)=> {
     var manifest = gulp.src('build/map-json/rev-manifest.json');
-    return gulp.src('build/**/*.html')
-        .pipe(revReplace({manifest: manifest}))
-        .pipe(gulp.dest('build'))
+    return gulp.src('build/views/**/*.html')
+        .pipe(revReplace({
+            manifest: manifest,
+            modifyUnReved: replaceStaticRoot,
+            modifyReved: replaceStaticRoot
+        }))
+        .pipe(gulp.dest('build/views'))
         .pipe(notify({message: 'revreplace complete'}))
 });
 
-gulp.task('html-staff', function (cb) {
-    gulpSequence('clean-html','htmlmin', cb)
+gulp.task('html-staff', (cb)=> {
+    gulpSequence('clean-html', 'htmlmin', cb)
 });
 
-gulp.task('css-staff', function (cb) {
-    gulpSequence('clean-css','sass','imagemin','base64','minify-css', cb)
+gulp.task('css-staff', (cb)=> {
+    gulpSequence('clean-css', 'sass', 'imagemin', 'base64', 'minify-css', cb)
 });
 
-gulp.task('js-staff', function (cb) {
-    gulpSequence('clean-scripts','babelify', 'js-uglify',cb)
+gulp.task('js-staff', (cb)=> {
+    gulpSequence('clean-scripts', 'babelify', 'js-uglify', cb)
 });
 
 /*htmlmin*/
 gulp.task('htmlmin', ()=>
-    gulp.src('src/views/*.html')
+    gulp.src('src/views/**/*.html')
         .pipe(htmlmin({collapseWhitespace: true}))
         .pipe(gulp.dest('tmp/views'))
-        .pipe(gulp.dest('views'))
+        .pipe(gulp.dest('build/views'))
         .pipe(notify({message: 'htmlmin complete'}))
 );
 
@@ -72,7 +99,7 @@ gulp.task('js-uglify', (cb)=> {
         ],
         cb
     )
-    .pipe(notify({message: 'js-uglify complete'}))
+        .pipe(notify({message: 'js-uglify complete'}))
 });
 
 /*cssmin*/
@@ -90,7 +117,7 @@ gulp.task('minify-css', ()=>
 
 /*babel+sourcemap*/
 gulp.task('babelify', ()=>
-    gulp.src('src/**/*.js')
+    gulp.src(['src/public/javascripts/**/*.js', '!src/public/javascripts/components/**/*.js'])
         .pipe(plumber())
         .pipe(sourcemaps.init())
         .pipe(babel({
@@ -108,23 +135,23 @@ gulp.task('babelify', ()=>
 
     }))
         .pipe(plumber.stop())
-        .pipe(gulp.dest('tmp'))
+        .pipe(gulp.dest('tmp/public/javascripts'))
         .pipe(notify({message: 'babel+sourcemap complete'}))
-)
+);
 
 /*clean*/
 gulp.task('clean-scripts', ()=>
-    gulp.src(['tmp/public/**/*.js','public/*.js','!tmp/public/components/*.js','!public/components/*.js'], {read: false})
+    gulp.src('{tmp,build}/public/**/*.js', {read: false})
         .pipe(clean())
 );
 
 gulp.task('clean-css', ()=> {
-    gulp.src(['tmp/public/**/*.css','public/*.css','!tmp/public/components/*.css','!public/components/*.css'], {read: false})
+    gulp.src(['{tmp,build}/public/**/*.css'], {read: false})
         .pipe(clean())
 });
 
 gulp.task('clean-html', ()=> {
-    gulp.src(['tmp/views/*.html','views/*.html'], {read: false})
+    gulp.src('{tmp,build}/views/**/*.html', {read: false})
         .pipe(clean())
 });
 
@@ -151,7 +178,7 @@ gulp.task('sass', ()=> {
         cssnext(),
         cssgrace
     ];
-    return gulp.src('src/**/*.scss')
+    return gulp.src('src/public/**/*.scss')
         .pipe(plumber())
         .pipe(sourcemaps.init())
         .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
@@ -161,7 +188,7 @@ gulp.task('sass', ()=> {
         }))
         .pipe(postcss(processors))
         .pipe(plumber.stop())
-        .pipe(gulp.dest('tmp'))
+        .pipe(gulp.dest('tmp/public'))
         .pipe(notify({message: 'sass complete'}))
 });
 
@@ -173,6 +200,10 @@ gulp.task('imagemin', () =>
         .pipe(gulp.dest('build'))
         .pipe(notify({message: 'imagemin complete'}))
 );
+/*cssmin*/
+gulp.task('cssmin', function () {
+    notify({message: 'cssmin complete'});
+});
 
 /*base64*/
 gulp.task('base64', ()=>
