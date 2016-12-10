@@ -1,3 +1,5 @@
+var Config = require('./config');
+
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -11,7 +13,7 @@ var index = require('./src/routes/index');
 
 var app = express();
 // view engine setup
-app.set('views', path.join(__dirname, 'src/views'));
+app.set('views', path.join(__dirname, Config.staticRoot+'/views'));
 app.engine('html', require('ejs').renderFile);
 // app.set('view engine', 'ejs');
 app.set('view engine', 'html');
@@ -30,7 +32,7 @@ app.use(cookieParser());
 //     indentedSyntax: true,
 //     sourceMap: true,
 // }));
-app.use(express.static(path.join(__dirname, 'src/public')));
+app.use(express.static(path.join(__dirname, Config.staticRoot+'/public')));
 app.use(partials());
 
 //启动映射

@@ -1,5 +1,6 @@
 const gulp = require('gulp');
 const babel = require('gulp-babel');
+const babelify = require('babelify');
 const sourcemaps = require('gulp-sourcemaps');
 const clean = require('gulp-clean');
 const concat = require('gulp-concat');
@@ -20,13 +21,19 @@ const plumber = require('gulp-plumber');
 const gulpSequence = require('gulp-sequence');
 const rev = require('gulp-rev');
 const revReplace = require('gulp-rev-replace');
+const browserify = require('browserify');
+const source = require('vinyl-source-stream');
+const buffer = require('vinyl-buffer');
+const glob = require("glob");
+const rename = require("gulp-rename");
+const es = require("event-stream");
+const del = require('del');
 
-var replaceStaticRoot = (filename)=> {
-    if ((filename.indexOf('.js') > -1) || (filename.indexOf('.css') > -1)) {
-        return filename.replace('public/', '');
-    }
-    return filename;
-};
+gulp.task('delAll', (cb)=> {
+    del(['tmp','build']).then(paths => {
+        console.log('Files and folders that would be deleted:\n', paths.join('\n'));
+    });
+});
 
 gulp.task('all', (cb)=> {
     gulpSequence('html-staff', 'css-staff', 'js-staff', 'add-rev', 'revreplace', 'copy', cb)
@@ -37,21 +44,21 @@ gulp.task('copy', (cb)=> {
 });
 
 gulp.task('copyCSS', (cb)=> {
-    return gulp.src('src/public/stylesheets/components/**/*.css')
+    return gulp.src('src/public/stylesheets/components/**/*')
         .pipe(gulp.dest('build/public/stylesheets/components'))
         .pipe(notify({message: 'copyCSS complete'}))
 });
 
 gulp.task('copyJS', (cb)=> {
-    return gulp.src('src/public/javascripts/components/**/*.js')
+    return gulp.src('src/public/javascripts/components/**/*')
         .pipe(gulp.dest('build/public/javascripts/components'))
         .pipe(notify({message: 'copyJS complete'}))
 });
 
 gulp.task('add-rev', (cb)=> {
-    return gulp.src(['tmp/**/*.css', 'tmp/**/*.js'])
+    return gulp.src(['tmp/public/**/*.css', 'tmp/public/**/*.js'])
         .pipe(rev())
-        .pipe(gulp.dest('build'))
+        .pipe(gulp.dest('build/public'))
         .pipe(rev.manifest())
         .pipe(gulp.dest('build/map-json'))
         .pipe(notify({message: 'add-rev complete'}))
@@ -61,9 +68,7 @@ gulp.task("revreplace", (cb)=> {
     var manifest = gulp.src('build/map-json/rev-manifest.json');
     return gulp.src('build/views/**/*.html')
         .pipe(revReplace({
-            manifest: manifest,
-            modifyUnReved: replaceStaticRoot,
-            modifyReved: replaceStaticRoot
+            manifest: manifest
         }))
         .pipe(gulp.dest('build/views'))
         .pipe(notify({message: 'revreplace complete'}))
@@ -116,28 +121,51 @@ gulp.task('minify-css', ()=>
 );
 
 /*babel+sourcemap*/
-gulp.task('babelify', ()=>
-    gulp.src(['src/public/javascripts/**/*.js', '!src/public/javascripts/components/**/*.js'])
-        .pipe(plumber())
-        .pipe(sourcemaps.init())
-        .pipe(babel({
-            presets: ['es2015', 'es2016', 'es2017', 'stage-3'],
-            plugins: [["transform-runtime", {
-                "polyfill": true,
-                "regenerator": true
-            }]]
-        })).on('error', function (err) {
-        console.log(err.stack);
-        this.emit('end');
-    }).pipe(sourcemaps.write({
-        includeContent: false,
-        sourceRoot: 'src'
+gulp.task('babelify', function(done) {
+    glob('src/public/javascripts/pages/**/**-index.js', function(err, files) {
+        if(err) done(err);
+        var tasks = files.map(function(entry) {
+            return browserify({ entries: [entry] })
+                .transform(babelify, {
+                    presets: ['es2015', 'es2016', 'es2017', 'stage-3'],
+                })
+                .bundle()
+                .pipe(source(entry.replace('src/public','')))
+                .pipe(rename({
+                    extname: '.bundle.js'
+                }))
+                .pipe(buffer())
+                .pipe(sourcemaps.init({loadMaps: true}))
+                .pipe(sourcemaps.write({
+                            includeContent: false,
+                            sourceRoot: 'src'
+                        }))
+                .pipe(gulp.dest("tmp/public/javascripts/pages"))
+                .pipe(notify({message: entry+'babel+sourcemap complete'}));
+        });
+        es.merge(tasks).on('end', done);
+    })
+});
 
-    }))
-        .pipe(plumber.stop())
-        .pipe(gulp.dest('tmp/public/javascripts'))
-        .pipe(notify({message: 'babel+sourcemap complete'}))
-);
+
+
+/*babel+sourcemap*/
+// ////////////////////////////
+//         gulp.src(['src/public/javascripts/**/*.js', '!src/public/javascripts/components/**/*.js'])
+//             .pipe(plumber())
+//             .pipe(sourcemaps.init())
+//             .pipe(babel({
+//                 presets: ['es2015', 'es2016', 'es2017', 'stage-3']
+//             })).on('error', function (err) {
+//             console.log(err.stack);
+//             this.emit('end');
+//         }).pipe(sourcemaps.write({
+//             includeContent: false,
+//             sourceRoot: 'src'
+//         }))
+//             .pipe(plumber.stop())
+//             .pipe(gulp.dest('tmp/public/javascripts'))
+//             .pipe(notify({message: 'babel+sourcemap complete'}))
 
 /*clean*/
 gulp.task('clean-scripts', ()=>
@@ -201,9 +229,6 @@ gulp.task('imagemin', () =>
         .pipe(notify({message: 'imagemin complete'}))
 );
 /*cssmin*/
-gulp.task('cssmin', function () {
-    notify({message: 'cssmin complete'});
-});
 
 /*base64*/
 gulp.task('base64', ()=>
@@ -222,7 +247,7 @@ gulp.task('watch', ()=>
     gulp.watch(['src/**/*.js'], ['babelify'])
 );
 
-gulp.task('default', ['all', 'watch'], ()=> {
+gulp.task('default', ['all'], ()=> {
     console.log('Task Default done');
 });
 

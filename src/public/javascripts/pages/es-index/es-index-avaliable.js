@@ -1,4 +1,4 @@
-function CheckAdd() {
+function checkAdd(cb) {
 	var num = 0;
 
 	$(".unnull").each(function (i, ele) {
@@ -23,7 +23,7 @@ function CheckAdd() {
 
 	if (num == 0) {
 		$("#aye").button('loading');
-		setTimeout('doAjax()',1000);
+		setTimeout(cb,1000);
 	}
 
 	function UnnullClear(ele) {
@@ -41,3 +41,5 @@ function CheckAdd() {
 		$(ele).find("span").eq(0).text(text);
 	}
 }
+
+module.exports=checkAdd;

@@ -1,5 +1,4 @@
 {
-  "public/javascripts/pages/es-index/es-index-avaliable.js": "public/javascripts/pages/es-index/es-index-avaliable-79bbcc8071.js",
-  "public/javascripts/pages/es-index/es-index.js": "public/javascripts/pages/es-index/es-index-6cf6abc66a.js",
-  "public/stylesheets/pages/es-index/es-index.css": "public/stylesheets/pages/es-index/es-index-32d355a173.css"
+  "javascripts/pages/es-index/es-index.bundle.js": "javascripts/pages/es-index/es-index-6a070a05de.bundle.js",
+  "stylesheets/pages/es-index/es-index.css": "stylesheets/pages/es-index/es-index-32d355a173.css"
 }
