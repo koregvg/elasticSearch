@@ -24,12 +24,7 @@ router.post('/search', function (req, res) {
         }),
         status: '',
         hits: '',
-        searchObj: {
-            index: req.body.unit.productLine,
-            type: req.body.unit.type,
-            start_time: req.body.unit.start_time,
-            start_time: req.body.unit.end_time
-        },
+        searchObj: req.body.unit.queryObj,
         testConnection: function () {
 
             this.client.ping({
@@ -50,9 +45,11 @@ router.post('/search', function (req, res) {
         searchAll: function (req, res, next) {
             if (this.testConnection()) {
                 this.client.search({
-                    index: this.searchObj.index,
-                    type: this.searchObj.type,
-                    body: {query: {match_all: {}}}
+                    body: {
+                        query: {
+                            match: this.searchObj
+                        }
+                    }
                     //q: '_search'
                 }).then(function (body) {
                     Dealer.hits = '';

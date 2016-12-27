@@ -9,14 +9,7 @@ var tuple_num = 0;
 var total = 0;
 var n = total / 15;
 
-var sum = 0;
-var produceLine = '';
-var type = '';
-var bid = '';
-var clientIP = '';
-var opcode = '';
-var start_time = '';
-var end_time = '';
+let queryObj={};
 
 var statusArray = [];
 statusArray[0] = "查询成功";
@@ -31,13 +24,13 @@ statusArray[8] = "协议异常";
 statusArray[9] = "不支持的编码";
 
 function getFormData() {
-    produceLine = $("#productLine").val();
-    type = $("#type").val();
-    bid = $("#bidInput").val();
-    clientIP = $("#clientIPInput").val();
-    opcode = $("#opcodeInput").val();
-    start_time = $("#start_time").val();
-    end_time = $("#end_time").val();
+    let eles=document.forms[0].elements;
+    for(let i=0;i<eles.length-1;i++){
+        if($(eles[i]).val()!=0 && $(eles[i]).val()!=''){
+            alert($(eles[i]).attr('name'));
+            queryObj[$(eles[i]).attr('name')]=$(eles[i]).val();
+        }
+    }
 }
 
 function doAjax() {
@@ -45,15 +38,7 @@ function doAjax() {
     getFormData();
 
     var request = {
-        unit: {
-            produceLine: produceLine,
-            type: type,
-            bid: bid,
-            clientIP: clientIP,
-            opcode: opcode,
-            start_time: start_time,
-            end_time: end_time
-        }
+        unit: queryObj
     };
 
     var jsonData = JSON.stringify(request);

@@ -31,7 +31,7 @@ const del = require('del');
 
 gulp.task('delAll', (cb)=> {
     del(['tmp','build']).then(paths => {
-        console.log('Files and folders that would be deleted:\n', paths.join('\n'));
+        console.log('文件已被删除:\n', paths.join('\n'));
     });
 });
 
@@ -89,6 +89,8 @@ gulp.task('js-staff', (cb)=> {
 /*htmlmin*/
 gulp.task('htmlmin', ()=>
     gulp.src('src/views/**/*.html')
+        // .pipe(inject(gulp.src('src/**/*.js', {read: false}), {relative: true}))
+        // .pipe(inject(gulp.src('src/**/*.js', {read: false}), {relative: true}))
         .pipe(htmlmin({collapseWhitespace: true}))
         .pipe(gulp.dest('tmp/views'))
         .pipe(gulp.dest('build/views'))
@@ -146,26 +148,6 @@ gulp.task('babelify', function(done) {
         es.merge(tasks).on('end', done);
     })
 });
-
-
-
-/*babel+sourcemap*/
-// ////////////////////////////
-//         gulp.src(['src/public/javascripts/**/*.js', '!src/public/javascripts/components/**/*.js'])
-//             .pipe(plumber())
-//             .pipe(sourcemaps.init())
-//             .pipe(babel({
-//                 presets: ['es2015', 'es2016', 'es2017', 'stage-3']
-//             })).on('error', function (err) {
-//             console.log(err.stack);
-//             this.emit('end');
-//         }).pipe(sourcemaps.write({
-//             includeContent: false,
-//             sourceRoot: 'src'
-//         }))
-//             .pipe(plumber.stop())
-//             .pipe(gulp.dest('tmp/public/javascripts'))
-//             .pipe(notify({message: 'babel+sourcemap complete'}))
 
 /*clean*/
 gulp.task('clean-scripts', ()=>
@@ -250,22 +232,3 @@ gulp.task('watch', ()=>
 gulp.task('default', ['all'], ()=> {
     console.log('Task Default done');
 });
-
-// var gulp=require('gulp');
-// var rev = require("gulp-rev");
-// var revReplace = require("gulp-rev-replace");
-// gulp.task("revision", function(){
-//     return gulp.src(["tmp/**/*.css", "tmp/**/*.js"])
-//         .pipe(rev())
-//         .pipe(gulp.dest('tmp'))
-//         .pipe(rev.manifest())
-//         .pipe(gulp.dest('tmp'))
-// });
-//
-// gulp.task("revreplace", ["revision"], function(){
-//     var manifest = gulp.src("tmp/rev-manifest.json");
-//
-//     return gulp.src('tmp' + "/**/*.html")
-//         .pipe(revReplace({manifest: manifest}))
-//         .pipe(gulp.dest('tmp'));
-// });
