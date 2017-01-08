@@ -45,12 +45,13 @@ router.post('/search', function (req, res) {
         searchAll: function (req, res, next) {
             if (this.testConnection()) {
                 this.client.search({
+                    _type: "logs",
                     body: {
                         query: {
-                            match: this.searchObj
+                            match:
+                                this.searchObj
                         }
                     }
-                    //q: '_search'
                 }).then(function (body) {
                     Dealer.hits = '';
                     Dealer.hits = body.hits.hits;

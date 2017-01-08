@@ -132,7 +132,7 @@ gulp.task('babelify', function(done) {
                     presets: ['es2015', 'es2016', 'es2017', 'stage-3'],
                 })
                 .bundle()
-                .pipe(source(entry.replace('src/public','')))
+                .pipe(source(entry.replace('src/public/javascripts/pages/','')))
                 .pipe(rename({
                     extname: '.bundle.js'
                 }))
